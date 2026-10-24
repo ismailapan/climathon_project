@@ -5,7 +5,7 @@ import streamlit as st
 
 # --- Veri yükleme ---
 all_results = pd.read_csv('data/walk_forward_results_hydrogen.csv', parse_dates=['date'])
-with open('percentiles.pkl', 'rb') as f:
+with open('data/percentiles.pkl', 'rb') as f:
     percentiles = pickle.load(f)
 
 # 2021 kuraklığı dönemi (vaka analizi ve proje özeti bu alt kümeyi kullanır)
@@ -359,7 +359,7 @@ st.divider()
 
 # --- Özellik önemi ---
 st.subheader("Model Hangi Veriye En Çok Güveniyor?")
-feature_importance = pd.read_csv('feature_importance.csv').sort_values('importance', ascending=False)
+feature_importance = pd.read_csv('data/feature_importance.csv').sort_values('importance', ascending=False)
 FEATURE_LABELS = {
     'T2M': 'Sıcaklık',
     'PRECTOTCORR': 'Yağış',
