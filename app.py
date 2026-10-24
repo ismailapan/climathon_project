@@ -207,7 +207,6 @@ IMPACT_STATS = [
 STATS = [
     ("%23", "Daha İsabetli", "Basit referans yönteme göre"),
     ("9", "Ay Önceden", "2021 kuraklığının erken tespiti"),
-    ("1,8", "Milyar $/yıl", "Önlenebilir maliyet potansiyeli"),
 ]
 
 
@@ -411,7 +410,7 @@ st.divider()
 st.subheader("Proje Hakkında")
 st.markdown(
     "Pilot baraj Atatürk Barajı'dır; veriler DAHITI (uydu altimetri) ve NASA POWER kaynaklarından alınmıştır. "
-    "Sistemin amacı yalnızca doğalgaz ithalatına erken uyarı vermek değil; hidroelektriğin "
+    "Sistemin amacı hidroelektriğin "
     "öngörülebilirliğini artırarak yeşil hidrojen üretim planlamasını ve temiz enerji entegrasyonunu "
     "desteklemektir. Su seviyesi tahmini üretim sapmasına, bu sapma da yeşil hidrojen potansiyeline ve "
     "gri hidrojene kıyasla önlenebilecek CO2 miktarına çevrilir."
