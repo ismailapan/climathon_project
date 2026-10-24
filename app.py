@@ -360,24 +360,25 @@ st.divider()
 # --- Özellik önemi ---
 st.subheader("Model Hangi Veriye En Çok Güveniyor?")
 feature_importance = pd.read_csv('feature_importance.csv').sort_values('importance', ascending=False)
-FEATURE_DESCRIPTIONS = {
-    'GWETROOT': 'Kök bölgesi toprak nemi',
-    'T2M': '2 m sıcaklık',
+FEATURE_LABELS = {
+    'T2M': 'Sıcaklık',
     'PRECTOTCORR': 'Yağış',
-    'SNODP': 'Kar derinliği',
-    'wse_lag1': '1 ay önceki su seviyesi',
-    'wse_lag2': '2 ay önceki su seviyesi',
-    'wse_lag3': '3 ay önceki su seviyesi',
+    'GWETROOT': 'Toprak Nemi',
+    'SNODP': 'Kar Derinliği',
+    'wse_lag1': '1 Ay Önceki Seviye',
+    'wse_lag2': '2 Ay Önceki Seviye',
+    'wse_lag3': '3 Ay Önceki Seviye',
 }
-feature_importance['Açıklama'] = feature_importance['feature'].map(FEATURE_DESCRIPTIONS).fillna('')
+# Yalnızca görünen etiketler değişir; veri ve sıralama aynı kalır
+feature_importance['Özellik'] = feature_importance['feature'].map(FEATURE_LABELS).fillna(feature_importance['feature'])
 fi_base = alt.Chart(feature_importance).encode(
-    y=alt.Y('feature:N', sort='-x', title=None, axis=alt.Axis(labelColor='#334155', labelLimit=200)),
+    y=alt.Y('Özellik:N', sort='-x', title=None, axis=alt.Axis(labelColor='#334155', labelLimit=200)),
     x=alt.X('importance:Q', title='Önem skoru'),
 )
 fi_chart = (
     (
         fi_base.mark_bar(color=COLOR_BAND, cornerRadiusTopRight=3, cornerRadiusBottomRight=3).encode(
-            tooltip=[alt.Tooltip('feature:N', title='Özellik'), alt.Tooltip('Açıklama:N'),
+            tooltip=[alt.Tooltip('Özellik:N'), alt.Tooltip('feature:N', title='Değişken'),
                      alt.Tooltip('importance:Q', title='Önem')]
         )
         + fi_base.mark_text(align='left', dx=4, color='#475569').encode(text='importance:Q')
