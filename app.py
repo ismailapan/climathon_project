@@ -187,11 +187,11 @@ st.caption("Fırat havzası pilot uygulaması · Hidrolojik veri + yapay zeka il
 
 st.markdown(
     '<div class="intro-card">'
-    "Türkiye'de kuraklık kaynaklı hidroelektrik belirsizliği, temiz enerjinin ne zaman ve ne kadar "
-    "güvenilir olacağını öngörmeyi zorlaştırıyor — bu da hem yenilenebilir enerjinin şebekeye "
+    "Türkiye'de kuraklık kaynaklı hidroelektrik belirsizliği temiz enerjinin ne zaman ve ne kadar "
+    "güvenilir olacağını öngörmeyi zorlaştırıyor. Bu da hem yenilenebilir enerjinin şebekeye "
     "entegrasyonunu hem de yeşil hidrojen üretimi gibi planlama gerektiren yatırımları riskli kılıyor. "
-    "Bu prototip, Fırat havzasındaki Atatürk Barajı'nı pilot alarak, uydu altimetrisi (DAHITI) ve iklim "
-    "verisiyle (NASA POWER) eğitilmiş bir modelin, 3 ay sonraki su seviyesini olasılıksal tahmin edip "
+    "Bu prototip, Fırat havzasındaki Atatürk Barajı'nı pilot alarak uydu altimetrisi (DAHITI) ve iklim "
+    "verisiyle (NASA POWER) eğitilmiş bir modelin 3 ay sonraki su seviyesini olasılıksal tahmin edip "
     "bunu hem bir erken uyarı göstergesine hem de somut bir temiz enerji/yeşil hidrojen potansiyeli "
     "hesabına bağladığı çalışan bir sistemi gösteriyor. Bu öngörülebilirlik, elektroliz tesislerinin "
     "üretim planlamasını ve şebeke operatörlerinin yenilenebilir entegrasyon kararlarını aylar önceden "
@@ -316,7 +316,7 @@ with st.container(border=True):
         st.caption(f"~{tr_num(case_co2_total / 3.3, 0)} aracın yıllık emisyonuna denk — kaba bir karşılaştırma.")
 
 st.markdown(
-    "Model bu düşüşü 9 ay boyunca önceden işaret etmişti — bu erken görünürlük, gerçek bir sistemde, "
+    "Model bu düşüşü 9 ay boyunca önceden işaret etmişti. Bu erken görünürlük, gerçek bir sistemde, "
     "üretim planlamasıyla bu kaybın bir kısmının telafi edilmesini sağlayabilirdi."
 )
 
@@ -410,7 +410,7 @@ st.divider()
 # --- Proje hakkında ---
 st.subheader("Proje Hakkında")
 st.markdown(
-    "Pilot baraj Atatürk Barajı'dır; veriler DAHITI (uydu altimetri) ve NASA POWER kaynaklarından alınmıştır. "
+    "Pilot baraj Atatürk Barajı'dır. Veriler DAHITI (uydu altimetri) ve NASA POWER kaynaklarından alınmıştır. "
     "Sistemin amacı hidroelektriğin "
     "öngörülebilirliğini artırarak yeşil hidrojen üretim planlamasını ve temiz enerji entegrasyonunu "
     "desteklemektir. Su seviyesi tahmini üretim sapmasına, bu sapma da yeşil hidrojen potansiyeline ve "
@@ -436,6 +436,6 @@ st.markdown(
     "model belirsizliği olması gerekenden biraz dar tahmin ediyor.\n"
     "- Geçmişe dönük doğrulama 2002–2026 arası veriyle yapıldı, ancak 2020 sonrası yalnızca 7 yıllık "
     "test dönemi var; istatistiksel güç sınırlı.\n"
-    "- Bu prototip yalnızca Atatürk Barajı için kuruldu; Karakaya, Keban ve çok havzalı genişletme "
+    "- Bu prototip yalnızca Atatürk Barajı için kuruldu. Karakaya, Keban ve çok havzalı genişletme "
     "sonraki aşamadır."
 )
