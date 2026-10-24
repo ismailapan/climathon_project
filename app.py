@@ -4,9 +4,20 @@ import pickle
 import streamlit as st
 
 # --- Veri yükleme ---
-all_results = pd.read_csv('walk_forward_results.csv', parse_dates=['date'])
+all_results = pd.read_csv('walk_forward_results_hydrogen.csv', parse_dates=['date'])
 with open('percentiles.pkl', 'rb') as f:
     percentiles = pickle.load(f)
+
+# 2021 kuraklığı dönemi (vaka analizi ve proje özeti bu alt kümeyi kullanır)
+case_df = all_results[(all_results['date'] >= '2021-06-01') & (all_results['date'] <= '2022-02-01')]
+case_h2_total = case_df['h2_potential_ton'].sum()
+case_co2_total = case_df['co2_avoided_ton'].sum()
+
+
+def tr_num(value, decimals=1, signed=False):
+    """Sayıyı Türkçe biçimde yazar: binlik ayracı nokta, ondalık virgül."""
+    text = f"{value:{'+' if signed else ''},.{decimals}f}"
+    return text.replace(',', '_').replace('.', ',').replace('_', '.')
 
 # --- Sayfa ayarları ---
 st.set_page_config(page_title="SuGözü — Atatürk Barajı Erken Uyarı Sistemi", layout="wide")
@@ -29,7 +40,13 @@ st.markdown(
     """
     <style>
     .block-container { padding-top: 2.5rem; max-width: 1200px; }
+    .stApp { background: linear-gradient(180deg, #EAF2FF 0px, #F8FAFC 380px); }
     h2, h3 { letter-spacing: -0.01em; }
+    h3 { border-left: 4px solid #2563EB; padding-left: 0.65rem !important; line-height: 1.25 !important; }
+    [data-testid="stMetricLabel"] { color: #64748B; }
+    .eyebrow { display: inline-block; background: #DBEAFE; color: #1D4ED8; font-size: 0.72rem;
+               font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+               padding: 0.3rem 0.75rem; border-radius: 999px; margin-bottom: 0.6rem; }
     .hero { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.25rem; }
     .hero-icon { font-size: 2.4rem; line-height: 1; }
     .hero-title { margin: 0; padding: 0; font-size: clamp(1.5rem, 3.4vw, 2.5rem); font-weight: 800;
@@ -40,11 +57,19 @@ st.markdown(
     .hero-sep { color: #94A3B8; font-weight: 400; }
     .intro-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid #2563EB;
                   border-radius: 12px; padding: 1.25rem 1.5rem; margin: 0.75rem 0 1rem 0;
-                  color: #334155; font-size: 1rem; line-height: 1.7; }
+                  color: #334155; font-size: 1rem; line-height: 1.7; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06); }
     .stat-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
                   gap: 1rem; margin-bottom: 0.5rem; }
     .stat-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-top: 3px solid #2563EB;
-                 border-radius: 12px; padding: 1rem 1.25rem; }
+                 border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05); }
+    .stat-strip.impact { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .stat-card.impact { background: linear-gradient(135deg, #ECFEFF 0%, #EFF6FF 100%);
+                        border-color: #BAE6FD; border-top-color: #0891B2; }
+    .stat-card.impact .stat-num { font-size: 2.4rem;
+                                  background: linear-gradient(90deg, #0F766E, #1D4ED8);
+                                  -webkit-background-clip: text; background-clip: text;
+                                  -webkit-text-fill-color: transparent; }
+    .stat-card.impact .stat-sub { color: #475569; }
     .stat-title { font-size: 1.15rem; font-weight: 700; color: #0F172A; white-space: nowrap; }
     .stat-num { font-size: 2rem; font-weight: 800; color: #1D4ED8; letter-spacing: -0.02em; }
     .stat-sub { font-size: 0.9rem; color: #64748B; margin-top: 0.15rem; }
@@ -152,6 +177,7 @@ def forecast_chart(df, height=380, monthly_ticks=False):
 
 
 st.markdown(
+    '<div class="eyebrow">Kuraklık erken uyarı · Yeşil hidrojen etkisi</div>'
     '<div class="hero"><span class="hero-icon">🌊</span>'
     '<h1 class="hero-title"><span class="hero-brand">SuGözü</span>'
     '<span class="hero-sep"> — </span>Atatürk Barajı Erken Uyarı Sistemi</h1></div>',
@@ -161,35 +187,41 @@ st.caption("Fırat havzası pilot uygulaması · Hidrolojik veri + yapay zeka il
 
 st.markdown(
     '<div class="intro-card">'
-    "Türkiye’de kuraklık kaynaklı hidroelektrik açığı, ancak gerçekleştiğinde fark ediliyor ve bu yüzden "
-    "en pahalı yoldan (son dakika doğalgaz alımı) kapatılıyor — bu da yılda ortalama 1,8 milyar dolarlık, "
-    "büyük ölçüde önlenebilir bir ek maliyete yol açıyor. Bu prototip, Fırat havzasındaki Atatürk Barajı’nı "
-    "pilot alarak, uydu altimetrisi (DAHITI) ve iklim verisiyle (NASA POWER) eğitilmiş bir makine öğrenmesi "
-    "modelinin, 3 ay sonraki su seviyesini olasılıksal olarak tahmin edip bunu basit bir erken uyarı "
-    "göstergesine (yeşil/sarı/turuncu/kırmızı) bağladığı çalışan bir sistemi gösteriyor. 2020-2026 arası "
-    "geçmişe dönük testte model, “değişmeyecek” varsayan basit bir referans yönteme göre tahmin hatasını "
-    "%23 azalttı; ayrıca 2021 kuraklığını, gerçekleşmeden 9 ay önce, aşamalı ve tutarlı bir şekilde doğru "
-    "yönde işaret ettiği somut bir vaka analiziyle gösterildi. Bu bir kavram kanıtıdır — tek baraj, bilinen "
-    "sınırlamalarla (dar güven aralığı, sınırlı test dönemi) birlikte sunulmaktadır."
+    "Türkiye'de kuraklık kaynaklı hidroelektrik belirsizliği, temiz enerjinin ne zaman ve ne kadar "
+    "güvenilir olacağını öngörmeyi zorlaştırıyor — bu da hem yenilenebilir enerjinin şebekeye "
+    "entegrasyonunu hem de yeşil hidrojen üretimi gibi planlama gerektiren yatırımları riskli kılıyor. "
+    "Bu prototip, Fırat havzasındaki Atatürk Barajı'nı pilot alarak, uydu altimetrisi (DAHITI) ve iklim "
+    "verisiyle (NASA POWER) eğitilmiş bir modelin, 3 ay sonraki su seviyesini olasılıksal tahmin edip "
+    "bunu hem bir erken uyarı göstergesine hem de somut bir temiz enerji/yeşil hidrojen potansiyeli "
+    "hesabına bağladığı çalışan bir sistemi gösteriyor. Bu öngörülebilirlik, elektroliz tesislerinin "
+    "üretim planlamasını ve şebeke operatörlerinin yenilenebilir entegrasyon kararlarını aylar önceden "
+    "desteklemeyi hedefliyor."
     "</div>",
     unsafe_allow_html=True,
 )
 
+IMPACT_STATS = [
+    (tr_num(int(case_co2_total), 0), "ton CO2", "2021 kuraklığında kaybedilen temiz enerji fırsatı (tek baraj, tek dönem)"),
+    (tr_num(int(case_h2_total), 0), "ton H2", "2021 kuraklığında kaybedilen yeşil hidrojen potansiyeli (tek baraj, tek dönem)"),
+]
 STATS = [
-    ("1,8", "Milyar $/yıl", "Önlenebilir maliyet potansiyeli"),
     ("%23", "Daha İsabetli", "Basit referans yönteme göre"),
     ("9", "Ay Önceden", "2021 kuraklığının erken tespiti"),
+    ("1,8", "Milyar $/yıl", "Önlenebilir maliyet potansiyeli"),
 ]
-st.markdown(
-    '<div class="stat-strip">'
-    + "".join(
-        f'<div class="stat-card"><div class="stat-title"><span class="stat-num">{num}</span> {unit}</div>'
+
+
+def stat_strip(stats, extra_class=""):
+    cards = "".join(
+        f'<div class="stat-card {extra_class}"><div class="stat-title"><span class="stat-num">{num}</span> {unit}</div>'
         f'<div class="stat-sub">{sub}</div></div>'
-        for num, unit, sub in STATS
+        for num, unit, sub in stats
     )
-    + "</div>",
-    unsafe_allow_html=True,
-)
+    st.markdown(f'<div class="stat-strip {extra_class}">{cards}</div>', unsafe_allow_html=True)
+
+
+stat_strip(IMPACT_STATS, "impact")
+stat_strip(STATS)
 
 # --- Güncel durum ---
 st.subheader("Güncel Durum")
@@ -208,6 +240,19 @@ with col3:
     with st.container(border=True):
         st.metric("Tahmin aralığı (q05–q95)", f"{latest['q05']:.1f}–{latest['q95']:.1f} m")
 
+# Hidrojen / CO2 etkisi (en son tahmin)
+h1, h2, h3 = st.columns(3)
+with h1:
+    with st.container(border=True):
+        st.metric("Tahmini üretim sapması", f"{tr_num(latest['generation_gwh'], signed=True)} GWh")
+        st.caption(f"Yön: {latest['direction'].capitalize()}")
+with h2:
+    with st.container(border=True):
+        st.metric("Yeşil H2 potansiyeli", f"{tr_num(latest['h2_potential_ton'])} ton")
+with h3:
+    with st.container(border=True):
+        st.metric("Önlenebilir CO2", f"{tr_num(latest['co2_avoided_ton'])} ton")
+
 st.divider()
 
 # --- Tahmin grafiği ---
@@ -221,10 +266,22 @@ st.divider()
 
 # --- Vaka analizi ---
 st.subheader("Vaka Analizi: 2021 Kuraklığı")
-case_df = all_results[(all_results['date'] >= '2021-06-01') & (all_results['date'] <= '2022-02-01')]
 with st.container(border=True):
     st.altair_chart(forecast_chart(case_df, height=320, monthly_ticks=True))
     st.markdown("Model, 2021 kuraklığını 9 ay boyunca aşamalı olarak doğru şekilde takip etti.")
+
+with st.container(border=True):
+    v1, v2 = st.columns(2)
+    with v1:
+        st.metric("Dönem toplam yeşil H2 potansiyeli", f"{tr_num(case_h2_total)} ton")
+    with v2:
+        st.metric("Dönem toplam önlenebilir CO2", f"{tr_num(case_co2_total)} ton")
+        st.caption(f"~{tr_num(case_co2_total / 3.3, 0)} aracın yıllık emisyonuna denk — kaba bir karşılaştırma.")
+
+st.markdown(
+    "Model bu düşüşü 9 ay boyunca önceden işaret etmişti — bu erken görünürlük, gerçek bir sistemde, "
+    "üretim planlamasıyla bu kaybın bir kısmının telafi edilmesini sağlayabilirdi."
+)
 
 st.divider()
 
@@ -249,11 +306,31 @@ for col, label, key in [(s1, "Gerçekleşen (target)", 'target'), (s2, "q05", 'q
         with st.container(border=True):
             st.metric(label, f"{row[key]:.2f} m")
 
+e1, e2, e3 = st.columns(3)
+with e1:
+    with st.container(border=True):
+        st.metric("Tahmini üretim sapması", f"{tr_num(row['generation_gwh'], signed=True)} GWh")
+        st.caption(f"Yön: {row['direction'].capitalize()}")
+with e2:
+    with st.container(border=True):
+        st.metric("Yeşil H2 potansiyeli", f"{tr_num(row['h2_potential_ton'])} ton")
+with e3:
+    with st.container(border=True):
+        st.metric("Önlenebilir CO2", f"{tr_num(row['co2_avoided_ton'])} ton")
+
 st.divider()
 
 # --- Tüm sonuçlar tablosu ---
 st.subheader("Tüm Test Sonuçları")
-st.dataframe(all_results[['date', 'target', 'q05', 'q50', 'q95', 'risk_band_clean']])
+st.dataframe(
+    all_results[['date', 'target', 'q05', 'q50', 'q95', 'risk_band_clean',
+                 'generation_gwh', 'h2_potential_ton', 'co2_avoided_ton']],
+    column_config={
+        'generation_gwh': st.column_config.NumberColumn("generation_gwh", format="%.1f GWh"),
+        'h2_potential_ton': st.column_config.NumberColumn("h2_potential_ton", format="%.1f ton"),
+        'co2_avoided_ton': st.column_config.NumberColumn("co2_avoided_ton", format="%.1f ton"),
+    },
+)
 
 st.divider()
 
@@ -261,6 +338,10 @@ st.divider()
 st.subheader("Proje Hakkında")
 st.markdown(
     "Pilot baraj Atatürk Barajı'dır; veriler DAHITI (uydu altimetri) ve NASA POWER kaynaklarından alınmıştır. "
+    "Sistemin amacı yalnızca doğalgaz ithalatına erken uyarı vermek değil; hidroelektriğin "
+    "öngörülebilirliğini artırarak yeşil hidrojen üretim planlamasını ve temiz enerji entegrasyonunu "
+    "desteklemektir. Su seviyesi tahmini üretim sapmasına, bu sapma da yeşil hidrojen potansiyeline ve "
+    "gri hidrojene kıyasla önlenebilecek CO2 miktarına çevrilir."
 )
 
 st.markdown("**Geliştirme Altyapısı**")
