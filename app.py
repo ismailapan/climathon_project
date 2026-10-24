@@ -4,7 +4,7 @@ import pickle
 import streamlit as st
 
 # --- Veri yükleme ---
-all_results = pd.read_csv('walk_forward_results_hydrogen.csv', parse_dates=['date'])
+all_results = pd.read_csv('data/walk_forward_results_hydrogen.csv', parse_dates=['date'])
 with open('percentiles.pkl', 'rb') as f:
     percentiles = pickle.load(f)
 
