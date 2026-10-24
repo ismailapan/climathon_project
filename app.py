@@ -407,6 +407,27 @@ st.dataframe(
 
 st.divider()
 
+# --- Küresel hedeflere uyum ---
+st.subheader("🎯 Küresel Hedeflere Uyum")
+GOALS = [
+    ("COP31 Hedefi", "Elektrifikasyonu 2035'e kadar %35'e çıkarmak",
+     "Hidroelektriğin öngörülebilirliği, şebekenin daha fazla yenilenebilir/elektrikli yük taşımasını "
+     "güvenle destekliyor."),
+    ("Siemens Impact Area", "Decarbonization & Energy",
+     "Modelin çıktısı, doğrudan yeşil hidrojen üretim planlamasına ve temiz enerji entegrasyonuna besleniyor."),
+    ("SDG 7", "Erişilebilir ve Temiz Enerji",
+     "Yenilenebilir enerjinin güvenilir, sürdürülebilir bir hizmete dönüşmesini "
+     "destekliyor."),
+]
+for col, (title, headline, note) in zip(st.columns(3), GOALS):
+    with col:
+        with st.container(border=True):
+            st.caption(title)
+            st.markdown(f"**{headline}**")
+            st.caption(note)
+
+st.divider()
+
 # --- Proje hakkında ---
 st.subheader("Proje Hakkında")
 st.markdown(
