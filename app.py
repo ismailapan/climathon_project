@@ -264,6 +264,44 @@ with st.container(border=True):
 
 st.divider()
 
+# --- Yıllık MAE karşılaştırması ---
+st.subheader("Model, Yıllar İçinde Nasıl Performans Gösterdi?")
+mae_by_year = (
+    all_results.assign(
+        model_err=(all_results['target'] - all_results['q50']).abs(),
+        baseline_err=(all_results['target'] - all_results['baseline']).abs(),
+    )
+    .groupby('test_year')[['model_err', 'baseline_err']].mean()
+    .rename(columns={'model_err': 'Model', 'baseline_err': 'Baseline'})
+    .reset_index()
+    .melt(id_vars='test_year', var_name='Yöntem', value_name='MAE')
+)
+mae_by_year['Yıl'] = mae_by_year['test_year'].astype(str)
+mae_chart = (
+    alt.Chart(mae_by_year)
+    .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
+    .encode(
+        x=alt.X('Yıl:O', title=None, axis=alt.Axis(labelAngle=0, labelColor='#475569')),
+        xOffset=alt.XOffset('Yöntem:N', sort=['Model', 'Baseline']),
+        y=alt.Y('MAE:Q', title='Ortalama mutlak hata, MAE (m)'),
+        color=alt.Color(
+            'Yöntem:N', title=None, sort=['Model', 'Baseline'],
+            scale=alt.Scale(domain=['Model', 'Baseline'], range=[COLOR_FORECAST, '#94A3B8']),
+            legend=alt.Legend(orient='top'),
+        ),
+        tooltip=[alt.Tooltip('Yıl:O'), alt.Tooltip('Yöntem:N'), alt.Tooltip('MAE:Q', title='MAE (m)', format='.2f')],
+    )
+    .properties(height=300)
+    .configure_view(strokeWidth=0)
+    .configure_axis(grid=True, gridColor='#E2E8F0', domainColor='#CBD5E1', titleColor='#475569')
+    .configure_legend(labelColor='#334155')
+)
+with st.container(border=True):
+    st.altair_chart(mae_chart)
+    st.markdown("Model, test edilen 7 yılın tamamında basit referans yöntemden daha düşük hata verdi.")
+
+st.divider()
+
 # --- Vaka analizi ---
 st.subheader("Vaka Analizi: 2021 Kuraklığı")
 with st.container(border=True):
@@ -317,6 +355,41 @@ with e2:
 with e3:
     with st.container(border=True):
         st.metric("Önlenebilir CO2", f"{tr_num(row['co2_avoided_ton'])} ton")
+
+st.divider()
+
+# --- Özellik önemi ---
+st.subheader("Model Hangi Veriye En Çok Güveniyor?")
+feature_importance = pd.read_csv('feature_importance.csv').sort_values('importance', ascending=False)
+FEATURE_DESCRIPTIONS = {
+    'GWETROOT': 'Kök bölgesi toprak nemi',
+    'T2M': '2 m sıcaklık',
+    'PRECTOTCORR': 'Yağış',
+    'SNODP': 'Kar derinliği',
+    'wse_lag1': '1 ay önceki su seviyesi',
+    'wse_lag2': '2 ay önceki su seviyesi',
+    'wse_lag3': '3 ay önceki su seviyesi',
+}
+feature_importance['Açıklama'] = feature_importance['feature'].map(FEATURE_DESCRIPTIONS).fillna('')
+fi_base = alt.Chart(feature_importance).encode(
+    y=alt.Y('feature:N', sort='-x', title=None, axis=alt.Axis(labelColor='#334155', labelLimit=200)),
+    x=alt.X('importance:Q', title='Önem skoru'),
+)
+fi_chart = (
+    (
+        fi_base.mark_bar(color=COLOR_BAND, cornerRadiusTopRight=3, cornerRadiusBottomRight=3).encode(
+            tooltip=[alt.Tooltip('feature:N', title='Özellik'), alt.Tooltip('Açıklama:N'),
+                     alt.Tooltip('importance:Q', title='Önem')]
+        )
+        + fi_base.mark_text(align='left', dx=4, color='#475569').encode(text='importance:Q')
+    )
+    .properties(height=max(40 * len(feature_importance), 160))
+    .configure_view(strokeWidth=0)
+    .configure_axis(grid=True, gridColor='#E2E8F0', domainColor='#CBD5E1', titleColor='#475569')
+)
+with st.container(border=True):
+    st.altair_chart(fi_chart)
+    st.markdown("Model, tahmin yaparken bu özelliklere ne kadar ağırlık verdiğini gösteriyor.")
 
 st.divider()
 
